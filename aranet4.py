@@ -53,7 +53,6 @@ class Edge(BackgroundBrowser):
 webbrowser.register('edge', None, webbrowser.BackgroundBrowser(edge_path))
 #%% HEROKU POSTGRESQL
 # Now, retrieve it using os.environ.get
-# Set the DATABASE_URL environment variable
 DATABASE_URL = os.environ.get("DATABASE_URL")
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
@@ -178,8 +177,9 @@ def aranet_display_container():
                     # data=initial_data.to_dict('records'),
                     editable=True,
                     row_deletable=True,
-                    page_size=20,  # Set the number of rows per page
+                    page_size=15,  # Set the number of rows per page
                     sort_action='native',
+                    sort_by=[{"column_id": "date", "direction": "desc"}, {"column_id": "time", "direction": "desc"}],  # Sort by Date and Time in descending order
                     style_table={'overflowX': 'auto'},
                     style_data_conditional=[
                         {'if': {'column_id': 'id'},

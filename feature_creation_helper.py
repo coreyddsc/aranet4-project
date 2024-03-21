@@ -4,46 +4,11 @@ import json
 import os
 import re
 
-import sqlalchemy as sql
-from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String, Text, delete, insert, DateTime, Float, Boolean, select, distinct, inspect, Time
-from datetime import datetime
+aranetExp_path = "./datasets/aranetExp.csv"
+aranet4_path = "./datasets/aranet4.csv"
 
-# Set the DATABASE_URL environment variable
-DATABASE_URL = os.environ.get("DATABASE_URL")
-if DATABASE_URL.startswith("postgres://"):
-    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
-
-# Create the database engine
-engine = sql.create_engine(DATABASE_URL)
-
-metadata = MetaData()
-
-# Query
-def query(sql_query):
-    data = pd.read_sql_query(sql_query, engine)
-    data.index += 1
-    return data
-
-# q = """
-# SELECT *
-# FROM aranet_lecture_data
-# """
-
-# aranetExp = query(q)
-
-q = """
-SELECT *
-FROM aranet4
-"""
-
-aranet4 = query(q)
-
-# Ensure the Date and Time columns are of type string
-aranet4['Date'] = aranet4['Date'].astype(str)
-aranet4['Time'] = aranet4['Time'].astype(str)
-
-# Combine Date and Time into a single datetime column
-aranet4['Datetime'] = pd.to_datetime(aranet4['Date'] + ' ' + aranet4['Time'])
+aranetExp = pd.read_csv(aranetExp_path)
+aranet4 = pd.read_csv(aranet4_path)
 
 # Function to categorize CO2 quality
 def categorize_co2(co2_value):
