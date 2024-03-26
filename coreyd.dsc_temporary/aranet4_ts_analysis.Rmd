@@ -1,0 +1,100 @@
+---
+title: "Aranet4 Time-series Analysis"
+output: html_notebook
+---
+
+## Read Aranet4 Data
+
+```{r read aranet4 data}
+aranet4 <- read.csv('./datasets/aranet4.csv')
+```
+
+## Libraries
+
+```{r}
+library(fpp2)
+library(ggplot2)
+```
+
+```{r}
+colnames(aranet4)
+```
+
+## Data Cleaning
+
+1.  We want to simplify some of the feature/target names as well as extract the current ones to use as labels.
+
+```{r}
+
+simplified_colnames <- c("CO2", "Temperature", "Humidity", "Pressure", "Date", "Time", "Datetime")
+colnames(aranet4) <- simplified_colnames
+labels_dict <- c(CO2 = "Carbon dioxide (ppm)",
+                 Temperature = "Temperature (°F)",
+                 Humidity = "Relative humidity (%)",
+                 Pressure = "Atmospheric pressure (hPa)")
+```
+
+2.  We need to ensure our Datetime column has the proper time-series formatting for working in the `fpp2` package.
+
+```{r}
+aranet4$Datetime <- as.POSIXct(aranet4$Datetime, format = "%Y-%m-%d %H:%M:%S")
+summary(aranet4$Datetime)
+```
+
+```{r}
+ggplot(aranet4, aes(x = Datetime, y = CO2)) +
+  geom_line() +
+  labs(title = "CO2 Levels Over Time",
+       x = "Time",
+       y = "CO2 (ppm)")
+```
+
+3.  There are some `NA's` we can exploring imputing for both \`Relative Humidity
+
+## Acf()
+
+```{r}
+library(forecast)
+Acf(aranet4$CO2, main = "ACF of CO2 Levels")
+Pacf(aranet4$CO2, main = "PACF of CO2 Levels")
+
+```
+
+```{r}
+co2_acf <- Acf(aranet4$CO2)
+
+```
+
+```{r}
+aranet4_diff <- diff(aranet4$CO2)
+ggplot(data.frame(Time = 1:length(aranet4_diff), CO2_diff = aranet4_diff), aes(x = Time, y = CO2_diff)) +
+  geom_line() +
+  labs(title = "Differenced CO2 Levels", x = "Time", y = "Differenced CO2")
+
+
+```
+
+## Arima
+
+```{r}
+arima_model <- auto.arima(aranet4$CO2)
+summary(arima_model)
+
+```
+
+```{r}
+Acf(residuals(arima_model), main = "ACF of Residuals")
+
+```
+
+```{r}
+Box.test(aranet4$CO2, type = "Ljung-Box")
+
+```
+
+```{r}
+library(forecast)
+ggAcf(aranet4$CO2, main = "ACF of CO2 Levels")
+ggAcf(aranet4$CO2, lag.max = 100, main = "ACF of CO2 Levels")
+t
+```
